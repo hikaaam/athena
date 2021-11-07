@@ -3,7 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\category;
+use App\Models\outlet;
 use App\Models\product;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -17,34 +19,49 @@ class DatabaseSeeder extends Seeder
     {
         // \App\Models\User::factory(10)->create();
         category::create([
-            "name"=>"Software",
-            "desc"=>"Aplikasi, service dll"
+            "name"=>"Makanan",
+            "desc"=>"lorem ipsum"
         ]);
-        category::create([
-            "name"=>"Hardware",
-            "desc"=>"Product barang"
+
+       $cat = category::create([
+            "name"=>"Minuman",
+            "desc"=>"lotem ipsum"
         ]);
-        $cat = category::create([
-            "name"=>"Paket Software & Hardware",
-            "desc"=>"Paket yang berisi produk software dan hardware"
+
+        //admin
+        User::create([
+            "name"=>"admin",
+            "email"=>"admin@admin.com",
+            "password"=>bcrypt("password")
         ]);
-        function seedProduct($name,$price,$image,$cat){
-            try {
+
+        //master user
+        $user = User::create([
+            "name"=>"Indomaret",
+            "email"=>"indomaret@indomaret.com",
+            "password"=>bcrypt("password")
+        ]);
+
+        //outlet 1
+        $outlet = outlet::create([
+            "name"=>"Indomaret Tegal",
+            "address"=>"Jalan ini nomor ini rt ini/ini",
+            "user_id"=>$user->id
+        ]);
+
+        function seedProduct($name,$price,$image,$cat,$user,$outlet){
             $id = $cat->id;
             product::create([
                 "name"=>$name,
                 "price"=>$price,
                 "image"=>$image,
                 "category_id"=>$id,
+                "user_id"=>$user->id,
+                "outlet_id"=>$outlet->id,
                 "desc"=>"Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aut quo exercitationem tenetur expedita vero magnam nostrum. Labore velit ipsa ipsum quia? Mollitia quam atque pariatur repellat ducimus dolores enim repudiandae."
-            ]);
-            } catch (\Throwable $th) {
-                //throw $th;
-            }           
+            ]);        
         }
-        seedProduct("Majoo Pro",2750000,"standard_repo.png",$cat);
-        seedProduct("Majoo Advance",2750000,"paket-advance.png",$cat);
-        seedProduct("Majoo Lifestyle",2750000,"paket-lifestyle.png",$cat);
-        seedProduct("Majoo Dekstop",2750000,"paket-desktop.png",$cat);
+        seedProduct("Kopi",5000,"standard_repo.png",$cat,$user,$outlet);
+        seedProduct("Teh Manis",3000,"paket-advance.png",$cat,$user,$outlet);
     }
 }

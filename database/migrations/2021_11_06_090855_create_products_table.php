@@ -19,6 +19,13 @@ class CreateProductsTable extends Migration
             $table->bigInteger("price");
             $table->string("image", 250);
             $table->text("desc");
+            $table->unsignedBigInteger("user_id");
+            $table->unsignedBigInteger("outlet_id");
+            $table->foreign("user_id")->references('id')->on('users')
+            ->onUpdate("cascade");
+            $table->foreign("outlet_id")->references("id")->on("outlets")
+                ->onDelete("cascade")
+                ->onUpdate("cascade");
             $table->unsignedBigInteger("category_id");
             $table->foreign("category_id")->references("id")->on("categories")
                 ->onDelete(null)

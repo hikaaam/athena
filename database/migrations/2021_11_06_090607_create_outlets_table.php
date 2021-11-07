@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateSuppliersTable extends Migration
+class CreateOutletsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,13 @@ class CreateSuppliersTable extends Migration
      */
     public function up()
     {
-        Schema::create('suppliers', function (Blueprint $table) {
+        Schema::create('outlets', function (Blueprint $table) {
             $table->id();
-            $table->string("name", 250)->unique();
-            $table->string("phone", 14);
             $table->unsignedBigInteger("user_id");
-            $table->foreign("user_id")->references('id')->on('users')
-            ->onUpdate("cascade");
+            $table->foreign("user_id")->references("id")
+            ->on("users")->onUpdate("cascade");
+            $table->string("name",250);
+            $table->text("address");
             $table->softDeletes($column = 'deleted_at', $precision = 0);
             $table->timestamps();
         });
@@ -32,6 +32,6 @@ class CreateSuppliersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('suppliers');
+        Schema::dropIfExists('outlets');
     }
 }

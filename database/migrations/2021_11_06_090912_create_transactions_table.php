@@ -15,16 +15,13 @@ class CreateTransactionsTable extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
+            $table->string("buyer_name", 250);
+            $table->enum("status", [0, 1])->default(0);
             $table->unsignedBigInteger("user_id");
-            $table->unsignedBigInteger("product_id");
-            $table->integer("qty");
-            $table->bigInteger("price");
-            $table->bigInteger("total");
-            $table->string("payment",250);
-            $table->foreign("user_id")->references("id")
-                ->on("users")->onUpdate("cascade");
-            $table->foreign("product_id")->references("id")
-                ->on("products")->onUpdate("cascade");
+            $table->foreign("user_id")->references("id")->on("users");
+            $table->unsignedBigInteger("outlet_id");
+            $table->foreign("outlet_id")->references("id")
+                ->on("outlets")->onUpdate("cascade");
             $table->timestamps();
         });
     }

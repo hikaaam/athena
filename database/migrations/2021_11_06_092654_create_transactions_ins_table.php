@@ -15,11 +15,12 @@ class CreateTransactionsInsTable extends Migration
     {
         Schema::create('transactions_in', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger("product_id");
             $table->unsignedBigInteger("supplier_id");
             $table->bigInteger("price");
+            $table->string("name", 250)->unique();
+            $table->integer("qty");
+            $table->enum("unit", ["Kg", "Gr", "Buah"])->default("Buah");
             $table->unsignedBigInteger("user_id");
-            $table->foreign("product_id")->references("id")->on("products")->onUpdate("cascade");
             $table->foreign("supplier_id")->references("id")->on("suppliers")->onUpdate("cascade");
             $table->foreign("user_id")->references("id")->on("users")->onUpdate("cascade");
             $table->timestamps();
