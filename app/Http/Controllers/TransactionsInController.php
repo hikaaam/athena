@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\category;
+use App\Models\supplier;
 use App\Models\transactions_in;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class TransactionsInController extends Controller
 {
@@ -14,7 +19,11 @@ class TransactionsInController extends Controller
      */
     public function index()
     {
-        //
+        $id = Auth::user()->id;
+        $category = category::all();
+        $supplier = supplier::where('user_id', $id)->get();
+        $transaction = transactions_in::where('user_id', $id)->with('supplier')->paginate(16);
+        return view('FrontEnd.Transaction_in.index', compact('category', 'supplier', 'transaction'));
     }
 
     /**
@@ -35,7 +44,30 @@ class TransactionsInController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            $validator =  Validator::make($request->all(), [
+                "name" => "required|string|max:250",
+                "unit" => "required",
+                "price" => "required|integer|min:100",
+                "qty" => "required|integer|min:1",
+                "supplier_id" => "required"
+            ]);
+            if ($validator->fails()) {
+                throw new Exception($validator->errors()->first());
+            }
+            $id = Auth::user()->id;
+            transactions_in::create([
+                "user_id" => $id,
+                "name" => $request->name,
+                "unit" => $request->unit,
+                "price" => $request->price,
+                "qty" => $request->qty,
+                "supplier_id" => $request->supplier_id
+            ]);
+            return back()->with("success", "berhasil menambahkan barang");
+        } catch (\Throwable $th) {
+            return back()->withInput()->withErrors(['msg' => $th->getMessage()]);
+        }
     }
 
     /**

@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\supplier;
-use App\Models\User;
+use App\Models\outlet;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
-class SupplierController extends Controller
+class OutletController extends Controller
 {
-
-    // Schema::create('suppliers', function (Blueprint $table) {
+    // Schema::create('outlets', function (Blueprint $table) {
     //     $table->id();
-    //     $table->string("name", 250)->unique();
-    //     $table->string("phone", 14);
-    //     $table->text("address")->nullable();
+    //     $table->unsignedBigInteger("user_id");
+    //     $table->foreign("user_id")->references("id")
+    //     ->on("users")->onUpdate("cascade");
+    //     $table->string("name",250);
+    //     $table->text("address");
     //     $table->softDeletes($column = 'deleted_at', $precision = 0);
     //     $table->timestamps();
     // });
@@ -29,8 +29,9 @@ class SupplierController extends Controller
     {
         try {
             $id = Auth::user()->id;
-            $data = supplier::where("user_id", $id)->paginate(16);
-            return view('FrontEnd.Supplier.index', compact('data'));
+            $data = outlet::where('user_id', $id)
+                ->paginate(16);
+            return view("FrontEnd.Outlet.index", compact('data'));
         } catch (\Throwable $th) {
             return back()->withErrors(["msg" => $th->getMessage()]);
         }
@@ -43,7 +44,7 @@ class SupplierController extends Controller
      */
     public function create()
     {
-        return view('FrontEnd.Supplier.create');
+        return view("FrontEnd.Outlet.create");
     }
 
     /**
@@ -57,17 +58,17 @@ class SupplierController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'name' => 'required|max:250',
-                'phone' => 'required|numeric|digits_between:12,13',
+                'address' => 'required'
             ]);
             if ($validator->fails()) {
                 throw new Exception($validator->errors()->first());
             }
-            $data = supplier::create([
+            outlet::create([
                 "name" => $request->name,
-                "phone" => $request->phone,
+                "address" => $request->address,
                 "user_id" => Auth::user()->id
             ]);
-            return back()->with("success", "berhasil menambah supplier");
+            return back()->with("success", "Berhasil menambahkan outlet");
         } catch (\Throwable $th) {
             return back()->withInput()->withErrors(["msg" => $th->getMessage()]);
         }
@@ -76,34 +77,34 @@ class SupplierController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\supplier  $supplier
+     * @param  \App\Models\outlet  $outlet
      * @return \Illuminate\Http\Response
      */
     public function show($id)
     {
-        // $data = supplier::find($id);
+        $data = outlet::find($id);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\supplier  $supplier
+     * @param  \App\Models\outlet  $outlet
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
     {
         try {
-            $data = supplier::find($id);
+            $data = outlet::find($id);
             $data == null && throw new Exception('404');
             Auth::user()->id !== $data->user_id && throw new Exception('401');
-            return view("FrontEnd.Supplier.edit", compact('data'));
+            return view("FrontEnd.Outlet.edit", compact('data'));
         } catch (\Throwable $th) {
             if ($th->getMessage() == '401') {
                 abort(401);
             } else if ($th->getMessage() == '404') {
                 abort(404);
-            } else {
-                return back()->withErrors(["msg" => $th->getMessage()]);
+            } else{
+                return back()->withErrors(["msg"=>$th->getMessage()]);
             }
         }
     }
@@ -112,7 +113,7 @@ class SupplierController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\supplier  $supplier
+     * @param  \App\Models\outlet  $outlet
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -120,17 +121,17 @@ class SupplierController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'name' => 'required|max:250',
-                'phone' => 'required|numeric|digits_between:12,13',
+                'address' => 'required'
             ]);
             if ($validator->fails()) {
                 throw new Exception($validator->errors()->first());
             }
-            $data = supplier::find($id)->update([
+            outlet::find($id)->update([
                 "name" => $request->name,
-                "phone" => $request->phone,
+                "address" => $request->address,
                 "user_id" => Auth::user()->id
             ]);
-            return back()->with("success", "berhasil menambah supplier");
+            return back()->with("success", "Berhasil update outlet");
         } catch (\Throwable $th) {
             return back()->withInput()->withErrors(["msg" => $th->getMessage()]);
         }
@@ -139,18 +140,16 @@ class SupplierController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\supplier  $supplier
+     * @param  \App\Models\outlet  $outlet
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
     {
         try {
-            $data = supplier::find($id);
-            if ($data == null) {
-                throw new Exception("supplier ini tidak ada");
-            }
+            $data = outlet::find($id);
+            if ($data == null) throw new Exception("Data tidak ditemukan");
             $data->delete();
-            return back()->with("success", "berhasil menghapus supplier");
+            return back()->with("success", "Berhasil Hapus Product");
         } catch (\Throwable $th) {
             return back()->withInput()->withErrors(["msg" => $th->getMessage()]);
         }

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\category;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
@@ -14,7 +16,8 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        //
+        $data = category::all();
+        return view('FrontEnd.Category.index', compact('data'));
     }
 
     /**
@@ -24,7 +27,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        //
+        return view('FrontEnd.Category.create');
     }
 
     /**
@@ -35,7 +38,19 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            $validator = Validator::make($request->all(), [
+                "name" => "required|string|max:250",
+                "desc" => "required"
+            ]);
+            if ($validator->fails()) {
+                throw new Exception($validator->errors()->first());
+            }
+            category::create($request->all());
+            return back()->with("success", "berhasil menambahkan category");
+        } catch (\Throwable $th) {
+            return back()->withInput()->withErrors(["msg", $th->getMessage()]);
+        }
     }
 
     /**
@@ -55,9 +70,13 @@ class CategoryController extends Controller
      * @param  \App\Models\category  $category
      * @return \Illuminate\Http\Response
      */
-    public function edit(category $category)
+    public function edit($id)
     {
-        //
+        $data = category::find($id);
+        if ($data == null) {
+            abort(404);
+        }
+        return view('FrontEnd.Category.edit',compact("data"));
     }
 
     /**
@@ -67,9 +86,21 @@ class CategoryController extends Controller
      * @param  \App\Models\category  $category
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, category $category)
+    public function update(Request $request, $id)
     {
-        //
+        try {
+            $validator = Validator::make($request->all(), [
+                "name" => "required|string|max:250",
+                "desc" => "required"
+            ]);
+            if ($validator->fails()) {
+                throw new Exception($validator->errors()->first());
+            }
+            category::find($id)->update($request->all());
+            return back()->with("success", "berhasil update category");
+        } catch (\Throwable $th) {
+            return back()->withInput()->withErrors(["msg", $th->getMessage()]);
+        }
     }
 
     /**
@@ -78,8 +109,17 @@ class CategoryController extends Controller
      * @param  \App\Models\category  $category
      * @return \Illuminate\Http\Response
      */
-    public function destroy(category $category)
+    public function destroy($id)
     {
-        //
+        try {
+            $cat = category::find($id);
+            if ($cat == null) {
+                throw new Exception("Category tidak ada");
+            }
+            $cat->delete();
+            return back()->with("success", "berhasil hapus category");
+        } catch (\Throwable $th) {
+            return back()->withInput()->withErrors(["msg", $th->getMessage()]);
+        }
     }
 }
